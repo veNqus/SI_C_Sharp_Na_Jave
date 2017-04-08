@@ -1,0 +1,10 @@
+czytajPlik :-
+open('test.txt',read,X),
+current_input(CI),
+set_input(X),
+kodOdczytujacy,
+close(X),
+set_input(CI).
+kodOdczytujacy :- read(Compound), obsluz(Compound).
+obsluz( end_of_file ) :- !.
+obsluz(Compound) :- write(Compound),nl,kodOdczytujacy.
