@@ -15,7 +15,8 @@ zapisDoPliku(Plik, Tekst) :-
 	open(Plik, write, X),
 	current_output(C0),
 	set_output(X),
-	write(Tekst),
+	atom_codes(Y,Tekst),
+	write(Y),
 	close(X),
 	set_output(C0).
 	
