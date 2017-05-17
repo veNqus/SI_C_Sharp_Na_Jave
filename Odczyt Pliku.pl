@@ -1,10 +1,21 @@
-czytajPlik :-
-open('test.txt',read,X),
-current_input(CI),
-set_input(X),
-kodOdczytujacy,
-close(X),
-set_input(CI).
-kodOdczytujacy :- read(Term), obsluz(Term).
-obsluz( end_of_file ) :- !.
-obsluz(Term) :- write(Term),nl,kodOdczytujacy.
+start(NazwaPliku) :-
+	readFromFile("test.cs", R),
+	%readFromFile(NazwaPliku, R),
+	print('\nKonwerter z C# na JAVE\n\n'),
+
+	zapisDoPliku("wynik.java", R).
+
+readFromFile(File, Output) :-
+	open(File, read, Temp, [encoding(utf8)]),
+	%open(File, read, Temp),
+	read_stream_to_codes(Temp, Output),
+	close(Temp).
+
+zapisDoPliku(Plik, Tekst) :-
+	open(Plik, write, X),
+	current_output(C0),
+	set_output(X),
+	write(Tekst),
+	close(X),
+	set_output(C0).
+	

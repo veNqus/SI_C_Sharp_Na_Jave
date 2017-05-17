@@ -105,3 +105,12 @@ komentarz(I,Wci) --> "//", linia(L,0), {wciecie(W,Wci), concat_atom([W,'//',L],I
 %print by móc wy1czyc drukowanie
 info(K).% :- print(K).
 
+%od_tego_momentu_moze_sie_zjebac
+petla_for(F,Wci) --> petla_for_naglowek(FN,Zmienna), {Wci1 is Wci+1}, petla_for_cialo(FC,Zmienna, Wci1), {wciecie(W,Wci), concat_atom([W, FN, '\n', W, '{', FC, W,'}\n'],F)}.
+petla_for_naglowek(F,N) --> "For", odstep_k, nazwa(N), odstep, "=", odstep, wyrazenie(LP), odstep_k, "To", odstep_k, wyrazenie(LK), odstep_k, "Step", odstep_k, calkowita(S), {concat_atom(['for(',N,'=',LP,'; ',N,'<',LK,'; ',N,'=',N,'+', S,')'],F)}.
+petla_for_naglowek(F,N) --> "For", odstep_k, nazwa(N), odstep, "=", odstep, wyrazenie(LP), odstep_k, "To", odstep_k, wyrazenie(LK), {concat_atom(['for(',N,'=',LP,'; ',N,'<',LK,'; ',N,'=',N,'+', S,')'],F)}.
+petla_for_cialo('',N,_) --> petla_for_stopka(N).
+petla_for_cialo(FC,N,Wci) --> petla_for_exit(E,0), petla_for_cialo(FC1,N,Wci), {wciecie(W,Wci), concat_atom([W,E,'\n',FC1],FC)}.
+petla_for_cialo(FC,N,Wci) --> petla_for_continue(C,0), petla_for_cialo(FC1,N,Wci), {wciecie(W,Wci), concat_atom([W,C,'\n',FC1],FC)}.
+petla_for_cialo(FC,N,Wci) --> instrukcja(I,Wci), petla_for_cialo(FC1,N,Wci), {concat_atom([I,FC1],FC)}.
+petla_for_exit(E,Wci) --> "break;", odstep_k, "For", nl_k, {wciecie(W,Wci), concat_atom([W, 'break;'],E)}.
