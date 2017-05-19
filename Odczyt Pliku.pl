@@ -106,37 +106,34 @@ wartosc_bool('false') --> "false".
 
 %petla FOR DO ZROBIENIA !!!
 petla_for(F,Wci) --> petla_for_naglowek(FN,Zmienna), {Wci1 is Wci+1}, petla_for_cialo(FC,Zmienna, Wci1), {wciecie(W,Wci), concat_atom([W, FN, '\n', W, '{', FC, W,'}\n'],F)}.
-petla_for_naglowek(F,N) --> "for", odstep_k,'(',list_def(LD,Wci) ";", odstep_k, wyrazenie(LK), odstep_k, "Step", odstep_k, calkowita(S), {concat_atom(['for(',N,'=',LP,'; ',N,'<=',LK,'; ',N,'=',N,'+', S,')'],F)}.
-petla_for_naglowek(F,N) --> "For", odstep_k, nazwa(N), odstep, "=", odstep, wyrazenie(LP), odstep_k, "To", odstep_k, wyrazenie(LK), {concat_atom(['for(',N,'=',LP,'; ',N,'<=',LK,'; ',N,'=',N,'+1)'],F)}.
+petla_for_naglowek(F,N) --> "for", odstep_k,'(',list_def(LD,Wci) ";", odstep_k, wyrazenie(LK), odstep_k, ';', "Step", odstep_k, calkowita(S), {concat_atom(['for(',N,'=',LP,'; ',N,'<=',LK,'; ',N,'=',N,'+', S,')'],F)}.
+petla_for_naglowek(F,N) --> "for", odstep_k, '(' ,list_def(LD,Wci), odstep, ";", odstep, wyrazenie(LP), odstep_k, ";", odstep_k, wyrazenie(LK), {concat_atom(['for(',N,'=',LP,'; ',N,'<=',LK,'; ',N,'=',N,'+1)'],F)}.
 petla_for_cialo('',N,_) --> petla_for_stopka(N).
 petla_for_cialo(FC,N,Wci) --> petla_for_exit(E,0), petla_for_cialo(FC1,N,Wci), {wciecie(W,Wci), concat_atom([W,E,'\n',FC1],FC)}.
-petla_for_cialo(FC,N,Wci) --> petla_for_continue(C,0), petla_for_cialo(FC1,N,Wci), {wciecie(W,Wci), concat_atom([W,C,'\n',FC1],FC)}.
 petla_for_cialo(FC,N,Wci) --> instrukcja(I,Wci), petla_for_cialo(FC1,N,Wci), {concat_atom([I,FC1],FC)}.
-petla_for_stopka(N) --> "Next", odstep_k, nazwa(N), nl_k.
-petla_for_exit(E,Wci) --> "Exit", odstep_k, "For", nl_k, {wciecie(W,Wci), concat_atom([W, 'break;'],E)}.
-petla_for_continue(C,Wci) --> "Continue", odstep_k, "For", nl_k, {wciecie(W,Wci), concat_atom([W, 'continue;'],C)}.
+petla_for_stopka(N) --> "}"
+petla_for_exit(E,Wci) --> "break;", nl_k, {wciecie(W,Wci), concat_atom([W, 'break;'],E)}.
 
 %instrukcja warunkowa IF
 warunek_if(IF,Wci) --> if_jednoliniowy(IF,Wci).
 warunek_if(IF,Wci) --> if_wieloliniowy(IF,Wci).
-if_jednoliniowy(IF,Wci) --> "If", odstep_k, warunek(War), odstep_k, "Then", odstep_k, instrukcja(I,0), else_jednoliniowy(E), nl_k, {wciecie(W,Wci), concat_atom([W,'if ', War,' ',I,E,'\n'],IF)}.
-else_jednoliniowy(E) --> odstep_k, "Else", odstep_k, instrukcja(I,0), {concat_atom([' else ',I],E)}.
+if_jednoliniowy(IF,Wci) --> "if", odstep_k,'(', warunek(War),')', odstep_k, "{", odstep_k, instrukcja(I,0), else_jednoliniowy(E), nl_k, {wciecie(W,Wci), concat_atom([W,'if ', War,' ',I,E,'\n'],IF)}.
+else_jednoliniowy(E) --> odstep_k, "else", odstep_k, instrukcja(I,0), {concat_atom([' else ',I],E)}.
 else_jednoliniowy('') --> "".
 if_wieloliniowy(IF,Wci) --> if_naglowek(IN), {Wci1 is Wci+1}, if_cialo(IC,Wci1), {wciecie(W,Wci), concat_atom([W, IN, '\n', W, '{\n', IC, W,'}\n'],IF)}.
-if_naglowek(IN) --> "If", odstep_k, warunek(War), odstep_k, then, nl_k, {concat_atom(['if ', War],IN)}.
+if_naglowek(IN) --> "if", odstep_k, '(',warunek(War),')', odstep_k, then, nl_k, {concat_atom(['if ', War],IN)}.
 if_cialo('', _) --> if_stopka.
 %if_cialo(IC, Wci) --> "Else", {Wci1 is Wci-1}, if_wieloliniowy(IC1,Wci1), {wciecie(W,Wci1), concat_atom([W,'}else\n',IC1],IC)}.
-if_cialo(IC, Wci) --> "Else", if_naglowek(IN), if_cialo(IC1,Wci), {Wci1 is Wci-1, wciecie(W,Wci1), concat_atom([W,'}else ',IN,'\n', W ,'{\n',IC1],IC)}.
-if_cialo(IC, Wci) --> "Else", nl_k, if_cialo(IC1,Wci), {Wci1 is Wci-1, wciecie(W,Wci1), concat_atom([W,'}else\n', W, '{\n',IC1],IC)}.
+if_cialo(IC, Wci) --> "else", if_naglowek(IN), if_cialo(IC1,Wci), {Wci1 is Wci-1, wciecie(W,Wci1), concat_atom([W,'}else ',IN,'\n', W ,'{\n',IC1],IC)}.
+if_cialo(IC, Wci) --> "else", nl_k, if_cialo(IC1,Wci), {Wci1 is Wci-1, wciecie(W,Wci1), concat_atom([W,'}else\n', W, '{\n',IC1],IC)}.
 if_cialo(IC, Wci) --> instrukcja(I,Wci), if_cialo(IC1,Wci), {concat_atom([I,IC1],IC)}.
-if_stopka --> "End If", nl_k.
-then --> "Then".
+if_stopka --> "}", nl_k.
 then --> "".
 
 
 warunek(War) --> wyrazenie(W1), odstep, relacja(R), odstep, wyrazenie(W2), {concat_atom(['(', W1, ' ', R, ' ', W2, ')'],War)}.
 %warunek(War) --> liczba(W1), odstep, relacja(R), odstep, liczba(W2), {concat_atom(['(', W1, ' ', R, ' ', W2, ')'],War)}.
-relacja('!=') --> "<>".
+relacja('!=') --> "!=".
 relacja('<=') --> "<=".
 relacja('>=') --> ">=".
 relacja('==') --> "=".
@@ -167,7 +164,6 @@ przypisanie(P,Wci) --> nazwa(N1), odstep, "=", odstep, "Console.ReadLine()", nl_
 przypisanie(P,Wci) --> nazwa(N1), odstep, "=", odstep, wyrazenie(Wyr), nl_k, {wciecie(W,Wci), concat_atom([W,N1,' = ', Wyr, ';\n'],P)}.
 przypisanie(P,Wci) --> nazwa(N1),"(",wyrazenie(Indeks),")", odstep, "=", odstep, wyrazenie(Wyr), nl_k, {wciecie(W,Wci), concat_atom([W,N1,'[',Indeks,'] = ', Wyr, ';\n'],P)}.
 
-wyrazenie(Wyr) --> elem_wyr(E1), odstep, "^", odstep, wyrazenie(E2), {concat_atom(['pow(', E1,',',E2,')'],Wyr)}.
 wyrazenie(Wyr) --> elem_wyr(E1), odstep, operator(O), odstep, wyrazenie(E2), {concat_atom([E1,O,E2],Wyr)}.
 wyrazenie(Wyr) --> elem_wyr(E1), odstep, operator(O), odstep, elem_wyr(E2), {concat_atom([E1,O,E2],Wyr)}.
 wyrazenie(Wyr) --> elem_wyr(E), {concat_atom([E],Wyr)}.
@@ -273,13 +269,19 @@ znak(Z) --> [Znak], {atom_codes(Z, [Znak])}.
 znak_niebialy(Z) --> [Znak], {not(code_type(Znak, space)), atom_codes(Z, [Znak])}.
 
 %Drukowanie
-cout(C,Wci) --> "Console.Write(",cout_srodek(S),")", {wciecie(W,Wci), concat_atom([W,'cout<<',S,';'],C),info(S)}.
-cout(C,Wci) --> "Console.WriteLine(",cout_srodek(S),")", {wciecie(W,Wci), info(S),concat_atom([W,'cout<<',S,'<<endl;'],C),info(S)}.
-cout_srodek(S) --> cout_s(CS1), odstep, "&", odstep, cout_srodek(CS2), {concat_atom([CS1,'<<',CS2],S)}.
+cout(C,Wci) --> "Console.WriteLine(",cout_srodek(S),")", {wciecie(W,Wci), concat_atom([W,'System.out.print(',S,');'],C),info(S)}.
+cout(C,Wci) --> "Console.WriteLine(",cout_srodek(S),")", {wciecie(W,Wci), info(S),concat_atom([W,'System.out.print(',S,');'],C),info(S)}.
+cout_srodek(S) --> cout_s(CS1), odstep, "+", odstep, cout_srodek(CS2), {concat_atom([CS1,'+',CS2],S)}.
 cout_srodek(S) --> cout_s(S).
 cout_s(CS) --> "\"", string(S), "\"", {concat_atom(['\"',S,'\"'],CS)}.
 cout_s(CS) --> "\"\"", {concat_atom(['\"\"'],CS)}.
 cout_s(CS) --> wyrazenie(CS).
+
+systemOut(C,Wci) --> "Console.WriteLine(", systemOut_srodek(S),")", {{wciecie(W,Wci), concat_atom([W,'System.out.print(',S,');'],C),info(S)}}
+systemOut(C,Wci) --> "Console.WriteLine(",systemOut_srodek(S),")", {wciecie(W,Wci), info(S),concat_atom([W,'System.out.printl(',S,');'],C),info(S)}.
+systemOut_srodek(S) --> systemOut_s(CS1), odstep, ",", odstep, systemOut_srodek(CS2), {concat_atom([CS1,',',CS2],S)}.
+systemOut_srodek(S) --> systemOut_s(S).
+systemOut_s(CS) --> wyrazenie(CS).
 
 
 %tekst_do(T,Do) --> znak(Z), tekst_do(T2,Do), {concat_atom([Z,T2],T)}.
