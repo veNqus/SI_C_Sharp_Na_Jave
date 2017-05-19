@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace cs2javaZad1
-{
-    class Program
-    {
-        static void Main(string[] args)
+﻿namespace CsToJavaZad {
+    class Program {
+	
+        int Main(int tekst)
         {
-            Console.WriteLine("Program polega na obliczeniu pola i obwodu prostokąta");
+	    
+            Console.WriteLine("testKK");
             int bokA = 10;
             int bokB = 15;
             int obwod;
