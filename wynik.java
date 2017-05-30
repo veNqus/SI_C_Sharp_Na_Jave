@@ -1,15 +1,18 @@
-test class Program
+
+test 
 
 
-class Program
+class cos
 {
-	System.out.print("testKK");
-	int bokA = 10;
-	int bokB = 15;
-	int obwod;
-	obwod = (2 * bokA + 2 * bokB);
-	int pole;
-	pole = bokA * bokB;
-	System.out.print("Obwod wynosi: "+obwod+", Pole wynosi: "+pole);
-	return test;
+
+	public int zmiana;
+
+	System.out.print("dziala");
+
+
+	}
+
+	public int funkcja( int zmienna ) {
+
+	return zmienna;
 }

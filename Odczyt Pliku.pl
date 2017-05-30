@@ -40,7 +40,7 @@ namespace_cialo(M,Dekl,Wci) --> class(P,N,Wci), modul_cialo(M2,Dekl2,Wci), {conc
 namespace_cialo('','',_) --> "".
 
 funkcja(F,Dekl,Wci) --> funkcja_nagl(FN), {Wci1 is Wci+1}, funkcja_cialo(FC,Wci1),  {info('funkcja\n'), wciecie(W,Wci), concat_atom(['\n',W,FN,'\n',W,'{\n',FC,W,'}\n'],F), concat_atom([FN, ';\n'],Dekl)}.
-funkcja_nagl(FN) --> typ(T), odstep_k, nazwa(Nazwa), odstep, !, "(", parametry(Parametry), ")", !, nl_k, !, {concat_atom([Typ,' ',Nazwa, '(', Parametry, ')'],FN), info(FN)}.
+funkcja_nagl(FN) --> typ(T), odstep_k, nazwa(Nazwa), odstep, !, "(", parametry(Parametry), ")", !, nl_k, !, {concat_atom([T,' ',Nazwa, '(', Parametry, ')'],FN), info(FN)}.
 funkcja_cialo('',_) --> funkcja_stopka.
 funkcja_cialo(FC,Wci) --> funkcja_return(R,Wci), funkcja_cialo(FC1,Wci), {concat_atom([R,FC1],FC)}.
 funkcja_cialo(FC,Wci) --> instrukcja(Cialo,Wci), funkcja_cialo(FC1,Wci), {concat_atom([Cialo,FC1],FC)}.

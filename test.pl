@@ -25,55 +25,62 @@ zapisDoPliku(Plik, Tekst) :-
 %plik(P) --> namespace(M,-1), nl_z, plik(P2), {info('namespace\n'), concat_atom([M,P2],P)}.
 plik(P) --> namespace(M,-1), nl_z,!, {info('namespace\n'), concat_atom([M],P)}.
 
-naglowki(N) :- concat_atom(['test '],N).
+naglowki(N) :- concat_atom(['\ntest \n'],N).
 %naglowki(N) :- concat_atom(['#include <stdio.h>\n#include <iostream>\n#include <math.h>\nusing namespace std;\n\n'],N).
 
 %namespace(M) --> "namespacee", tekst(Cialo), , {concat_atom([Cialo],M)}.
 %namespace(M) --> "namespacee", odstep, wyraz(Nazwa), nowa_linia, tekst(MC), "End namespacee", !, {concat_atom([W,'namespace:',Nazwa,'\n',MC],M)}.
-namespace(M,Wci) --> "namespace", odstep_k, nazwa(_),odstep_k, "{", !, {Wci1 is Wci+1}, namespace_cialo(MC,Dekl,Wci1), "}", {concat_atom([Dekl,'\n',MC],M)}.
+namespace(M,Wci) --> "namespace", odstep_k, nazwa(_),odstep, "{", !, {Wci1 is Wci+1}, namespace_cialo(MC,Dekl,Wci1), "}", {concat_atom([Dekl,'\n',MC],M)}.
 namespace_cialo(M,Dekl,Wci) --> funkcja(F,N,Wci), ws,  namespace_cialo(M2,Dekl2,Wci), {concat_atom([F,M2],M), concat_atom([N,Dekl2],Dekl), info(' funkcja ')}.
 namespace_cialo(M,Dekl,Wci) --> class(P,N,Wci),ws,  namespace_cialo(M2,Dekl2,Wci), {concat_atom([P,M2],M), concat_atom([N,Dekl2],Dekl), info(' Klasa ')}.
 namespace_cialo('','',_) --> "".
 
-funkcja(F,Dekl,Wci) --> funkcja_nagl(FN), {Wci1 is Wci+1}, funkcja_cialo(FC,Wci1),  {info('funkcja\n'), wciecie(W,Wci), concat_atom(['\n',W,FN,'\n',W,'{\n',FC,W,'}\n'],F), concat_atom([FN, ';\n'],Dekl)}.
-funkcja_nagl(FN) --> ws, typ(T), odstep_k, nazwa(Nazwa), odstep, !, "(", parametry(Parametry), ")",odstep_k, "{" ,!, nl_k, !, {concat_atom([Typ,' ',Nazwa, '(', Parametry, ') {'],FN), info(FN)}.
-%funkcja_cialo('',_) --> funkcja_stopka.
+funkcja(F,Dekl,Wci) --> funkcja_nagl(FN), {Wci1 is Wci+1}, funkcja_cialo(FC,Wci1),  {info('funkcja\n'), wciecie(W,Wci), concat_atom(['\n',W,FN,'\n',W,'{\n',FC,W,'}\n'],F)}.
+funkcja_nagl(FN) --> ws, modyfikator(MX),odstep, typ(T), odstep_k, nazwa(Nazwa), odstep, !, "(", parametry(Parametry),odstep, ")", odstep, '{', !, nl_k, !, {concat_atom([MX ,' ',T,' ',Nazwa, '(', Parametry, ')'],FN), info(FN)}.
+funkcja_cialo('',_) --> funkcja_stopka.
 funkcja_cialo(FC,Wci) --> funkcja_return(R,Wci), funkcja_cialo(FC1,Wci), {concat_atom([R,FC1],FC)}.
-funkcja_cialo(FC,Wci) --> ws, instrukcja(Cialo,Wci), funkcja_cialo(FC1,Wci), {concat_atom(['\n',Cialo,FC1,],FC)}.
-%funkcja_stopka --> ws, "}", nl_k.
-funkcja_return(R,Wci) --> ws, "return", odstep_k, wyrazenie(Wyr),";" {wciecie(W,Wci), concat_atom([W, 'return ',Wyr,';}'],R)}.
+funkcja_cialo(FC,Wci) --> instrukcja(Cialo,Wci), funkcja_cialo(FC1,Wci), {concat_atom([Cialo,FC1],FC)}.
+funkcja_stopka --> "}", nl_k.
+funkcja_return(R,Wci) --> ws, "return", odstep_k, wyrazenie(Wyr), {wciecie(W,Wci), concat_atom([W, 'return ',Wyr,';'],R)}.
 
-class(F,Dekl,Wci) --> class_nagl(PN), {Wci1 is Wci+1}, class_cialo(PC,Wci1), {info('class\n'), wciecie(W,Wci), concat_atom(['\n',W,PN,'\n',W,'{\n',PC,W,'}\n'],F), concat_atom([PN, '\n'],Dekl)}.
+class(F,Dekl,Wci) --> class_nagl(PN), {Wci1 is Wci+1}, class_cialo(PC,Wci1), {info('class\n'), wciecie(W,Wci), concat_atom(['\n',W,PN,'\n',W,'{\n',PC,W,'}\n'],F), concat_atom([''],Dekl)}.
 class_nagl(PN) --> ws, "class", odstep_k, wyraz(Nazwa) , odstep, "{", !, nl_k, {concat_atom(['class ',Nazwa],PN), info(PN)}.
 class_cialo('',_) --> class_stopka.
-class_cialo(PC,Wci) --> instrukcja(Cialo, Wci), class_cialo(PC1,Wci), {concat_atom([Cialo,PC1],PC)}.
+class_cialo(PC,Wci) --> funkcja(Cialo,_,Wci), class_cialo(PC1,Wci), {concat_atom(['\n',Cialo,PC1],PC)}.
+class_cialo(PC,Wci) --> instrukcja(Cialo, Wci), class_cialo(PC1,Wci), {concat_atom(['\n',Cialo,PC1],PC)}.
 class_stopka --> ws,"}", nl_k.
 
-parametry(P) --> parametr(P1), odstep, ",", odstep, parametry(P2), {concat_atom([P1,', ',P2],P)}.
-parametry(P) --> parametr(P).
+parametry(P) --> ws, parametr(P1), odstep, ",", odstep, parametry(P2), {concat_atom([P1,', ',P2],P)}.
+parametry(P) --> parametr(P), {info('Szukam parametru')}.
 parametry('') --> "".
-parametr(P) --> typ(T), odstep_k, nazwa(N), odstep_k, {concat_atom([T,' ',N],P)}.
+parametr(P) --> typ(T), odstep_k, nazwa(N), odstep, {concat_atom([T,' ',N],P)}.
 
 instrukcje(I,Wci) --> instrukcja(I1,Wci), instrukcje(I2,Wci), {concat_atom([I1,I2],I)}.
 instrukcje('',_) --> "".
 
 %typ
 typ('int')--> "int".
-typ('boolean')--> "bool".
+typ('bool')--> "boolean".
 typ('double')--> "double".
 typ('String')--> "string".
 typ('char')--> "char".
+typ('void')--> "void".
+
+%modyfikator
+modyfikator('public') --> "public".
+modyfikator('private') --> "private".
+modyfikator('') --> "".
 
 %Definicja zmiennych
 list_def(LD,Wci) --> ws,definition(D,Wci), nl_k, list_def(LD1,Wci), {concat_atom([D,'\n',LD1],LD)}.
 list_def(LD,Wci) --> ws,definition(D,Wci), {concat_atom([D, '\n'],LD)}.
-definition(L,Wci) --> ws, typ(T), odstep_k, lista_list_zmiennych(L,Wci).
+definition(L,Wci) -->  ws, typ(T), odstep_k, lista_list_zmiennych(L,Wci).
 lista_list_zmiennych(L,Wci) --> ws,lista_zmiennych(LZ,Wci), odstep, ",", odstep, lista_list_zmiennych(LLZ,Wci), {concat_atom([LZ,'\n',LLZ],L),info(L)}.
 lista_list_zmiennych(L,Wci) --> ws,lista_zmiennych(L,Wci).
 %lista_zmiennych(L,Wci) --> lista_nazw_zmiennnych(LNZ), odstep_k, "As", odstep_k, typ(T), ew_podstawienie(P), {wciecie(W,Wci), concat_atom([W, T,' ',LNZ,P,';'],L),info(L)}.
-lista_zmiennych(L,Wci) --> ws,typ(T), zmienne_bez_wart(LNZ), odstep_k, {wciecie(W,Wci), concat_atom([W, T,' ',LNZ,';'],L),info(L)}.
-lista_zmiennych(L,Wci) --> ws,typ(T), zmienne_z_wart(LNZ), nazwa(N), odstep_k, podstawienie(P), {wciecie(W,Wci), concat_atom([W,LNZ,T,' ',N, ' = ', P,';'],L),info(L)}.
-lista_zmiennych(L,Wci) --> ws,typ(T), zmienne_z_wart(ZZW), zmienne_bez_wart(ZBW), odstep_k, {wciecie(W,Wci), concat_atom([W,ZZW,T,' ', ZBW,';'],L),info(L)}.
+lista_zmiennych(L,Wci) --> ws, zmienne_bez_wart(LNZ), odstep_k, {wciecie(W,Wci), concat_atom([W,' ',LNZ,';'],L),info(L)}.
+lista_zmiennych(L,Wci) --> ws, zmienne_z_wart(LNZ), nazwa(N), odstep_k, podstawienie(P), {wciecie(W,Wci), concat_atom([W, LNZ,T,' ',N, ' = ', P,';'],L),info(L)}.
+lista_zmiennych(L,Wci) --> ws, zmienne_z_wart(ZZW), zmienne_bez_wart(ZBW), odstep_k, {wciecie(W,Wci), concat_atom([W,ZZW,T,' ', ZBW,';'],L),info(L)}.
 zmienne_z_wart(L) --> ws,zmienne_z_wart_(L).
 zmienne_z_wart('') --> "".
 zmienne_z_wart_(L) --> ws,nazwa(N), podstawienie(P,Typ), odstep, ",", odstep, zmienne_z_wart_(LZ), {concat_atom([Typ, ' ', N, ' = ', P,';\n',LZ],L)}.
@@ -102,32 +109,29 @@ wartosc_bool('false') --> "false".
 
 %petla FOR DO ZROBIENIA !!!
 petla_for(F,Wci) --> petla_for_naglowek(FN,Zmienna), {Wci1 is Wci+1}, petla_for_cialo(FC,Zmienna, Wci1), {wciecie(W,Wci), concat_atom([W, FN, '\n', W, '{', FC, W,'}\n'],F)}.
-petla_for_naglowek(F,N) --> ws,"for", odstep_k,'(',list_def(LD,Wci) ";", odstep_k, wyrazenie(LK), odstep_k, ';', "Step", odstep_k, calkowita(S), {concat_atom(['for(',N,'=',LP,'; ',N,'<=',LK,'; ',N,'=',N,'+', S,')'],F)}.
-petla_for_naglowek(F,N) --> ws,"for", odstep_k, '(' ,list_def(LD,Wci), odstep, ";", odstep, wyrazenie(LP), odstep_k, ";", odstep_k, wyrazenie(LK), {concat_atom(['for(',N,'=',LP,'; ',N,'<=',LK,'; ',N,'=',N,'+1)'],F)}.
+%petla_for_naglowek(F,N) --> ws, "for", odstep_k,"(",list_def(LD,Wci) ";", odstep_k, wyrazenie(LK), odstep_k, ';', "Step", odstep_k, calkowita(S), {concat_atom(['for(',N,'=',LP,'; ',N,'<=',LK,'; ',N,'=',N,'+', S,')'],F)}.
+petla_for_naglowek(F,N) --> ws,"for", odstep_k, "(" ,list_def(LD,Wci), odstep, ";", odstep, wyrazenie(LP), odstep, ";", odstep, wyrazenie(LK),")", odstep, "{", {concat_atom(['for(',N,'=',LP,'; ',N,'<=',LK,'; ',N,'=',N,'+1)'],F)}.
 petla_for_cialo('',N,_) --> petla_for_stopka(N).
 petla_for_cialo(FC,N,Wci) --> petla_for_exit(E,0), petla_for_cialo(FC1,N,Wci), {wciecie(W,Wci), concat_atom([W,E,'\n',FC1],FC)}.
 petla_for_cialo(FC,N,Wci) --> instrukcja(I,Wci), petla_for_cialo(FC1,N,Wci), {concat_atom([I,FC1],FC)}.
 petla_for_stopka(N) --> ws,"}"
 petla_for_exit(E,Wci) --> ws,"break;", nl_k, {wciecie(W,Wci), concat_atom([W, 'break;'],E)}.
 
-%static void main
-funkcja_start(V,Wci) --> funkcja_start_cialo(V,Wci)
 
 %instrukcja warunkowa IF
 warunek_if(IF,Wci) --> if_jednoliniowy(IF,Wci).
 warunek_if(IF,Wci) --> if_wieloliniowy(IF,Wci).
-if_jednoliniowy(IF,Wci) --> ws,"if", odstep_k,'(', warunek(War),')', odstep_k, "{", odstep_k, instrukcja(I,0), else_jednoliniowy(E), nl_k, {wciecie(W,Wci), concat_atom([W,'if ', War,' ',I,E,'\n'],IF)}.
+if_jednoliniowy(IF,Wci) --> ws,"if", odstep,"(", warunek(War),")", odstep, "{", odstep_k, instrukcja(I,0), else_jednoliniowy(E), nl_k, {wciecie(W,Wci), concat_atom([W,'if ', War,' ',I,E,'\n'],IF)}.
 else_jednoliniowy(E) --> odstep_k, "else", odstep_k, instrukcja(I,0), {concat_atom([' else ',I],E)}.
 else_jednoliniowy('') --> "".
 if_wieloliniowy(IF,Wci) --> if_naglowek(IN), {Wci1 is Wci+1}, if_cialo(IC,Wci1), {wciecie(W,Wci), concat_atom([W, IN, '\n', W, '{\n', IC, W,'}\n'],IF)}.
-if_naglowek(IN) --> ws,"if", odstep_k, '(',warunek(War),')', odstep_k, then, nl_k, {concat_atom(['if ', War],IN)}.
+if_naglowek(IN) --> ws,"if", odstep, "(",warunek(War),")", odstep, "{", nl_k, {concat_atom(['if ', War],IN)}.
 if_cialo('', _) --> if_stopka.
 %if_cialo(IC, Wci) --> "Else", {Wci1 is Wci-1}, if_wieloliniowy(IC1,Wci1), {wciecie(W,Wci1), concat_atom([W,'}else\n',IC1],IC)}.
 if_cialo(IC, Wci) --> ws,"else", if_naglowek(IN), if_cialo(IC1,Wci), {Wci1 is Wci-1, wciecie(W,Wci1), concat_atom([W,'}else ',IN,'\n', W ,'{\n',IC1],IC)}.
 if_cialo(IC, Wci) --> ws,"else", nl_k, if_cialo(IC1,Wci), {Wci1 is Wci-1, wciecie(W,Wci1), concat_atom([W,'}else\n', W, '{\n',IC1],IC)}.
 if_cialo(IC, Wci) --> instrukcja(I,Wci), if_cialo(IC1,Wci), {concat_atom([I,IC1],IC)}.
 if_stopka --> ws,"}", nl_k.
-then --> "".
 
 warunek(War) --> wyrazenie(W1), odstep, relacja(R), odstep, wyrazenie(W2), {concat_atom(['(', W1, ' ', R, ' ', W2, ')'],War)}.
 %warunek(War) --> liczba(W1), odstep, relacja(R), odstep, liczba(W2), {concat_atom(['(', W1, ' ', R, ' ', W2, ')'],War)}.
@@ -141,14 +145,15 @@ relacja('<') --> "<".
 %instrukcja(I,Wci) --> funkcja_start(I,Wci), {info(' static Main ')}.
 instrukcja(I,Wci) --> cout(I,Wci), {info(' COUT ')}.
 instrukcja(I,Wci) --> petla_for(I,Wci), {info(' FOR ')}.
-instrukcja(I,Wci) --> funkcja(I, Wci), {info('FUNKCJA')}
 instrukcja(I,Wci) --> list_def(I,Wci), {info(' DEF ')}.
 instrukcja(I,Wci) --> komentarz(I,Wci).
 instrukcja(I,Wci) --> warunek_if(I,Wci).
+instrukcja(I,_,Wci) --> funkcja(I,Wci).
 %instrukcja(I,Wci) --> petla_for_exit(I,Wci).
 instrukcja(I,Wci) --> wywolanie_funkcji(WF), nl_k, {wciecie(W,Wci), concat_atom([W,WF,';\n'],I)}.
 instrukcja(I,Wci) --> "Console.ReadKey();", nl_k, {wciecie(W,Wci), concat_atom([W,'system("pause");\n'],I)}.
 instrukcja(I,Wci) --> linia(I,Wci).%, {info(' LINIA ')}.
+instrukcja(I,Wci) --> "}", {wciecie(W,Wci), concat_atom([W,'}'],I)}.
 
 komentarz(I,Wci) --> "//", linia(L,0), {wciecie(W,Wci), concat_atom([W,'//',L],I)}.
 
@@ -161,10 +166,10 @@ lista_wyrazen('')  --> "".
 
 elem_wyr(EW) --> "(", odstep, wyrazenie(Wyr), odstep, ")", {concat_atom(['(',Wyr,')'],EW)}.
 elem_wyr(EW) --> nazwa(Nazwa),".Length", {concat_atom([Nazwa,".length" ],EW)}.
-elem_wyr(EW) --> wartosc_bool(EW).
-elem_wyr(EW) --> wywolanie_funkcji(EW).
-elem_wyr(EW) --> nazwa(EW).
-elem_wyr(EW) --> liczba(EW).
+elem_wyr(EW) --> ws,wartosc_bool(EW).
+elem_wyr(EW) --> ws,wywolanie_funkcji(EW).
+elem_wyr(EW) --> ws,nazwa(EW).
+elem_wyr(EW) --> ws,liczba(EW).
 operator('+') --> "+".
 operator('-') --> "-".
 operator('*') --> "*".

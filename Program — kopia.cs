@@ -1,18 +1,16 @@
 ﻿namespace CsToJavaZad {
     class Program {
-	
-        int Main(int tekst)
-        {
-	    
-            Console.WriteLine("testKK");
-            int bokA = 10;
-            int bokB = 15;
-            int obwod;
-            obwod = (2 * bokA + 2 * bokB);
-            int pole;
-            pole = bokA * bokB;
-            Console.WriteLine("Obwod wynosi: " + obwod + ", Pole wynosi: " + pole);
-	    return test;
-        }
+        private double funkcja (int zmienna2) {
+	    Console.WriteLine("działam");
+	    return zmienna2;
+	}		                         
+    }
+    public int funkcja( int zmienna ) {
+	if (zmienna > 0) {
+	    Console.WriteLine("liczba naturalna");
+        } else {
+	    Console.WriteLine("liczba calkowita");
+	}
+	return zmienna;
     }
 }
