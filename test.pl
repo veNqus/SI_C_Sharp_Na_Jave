@@ -23,27 +23,25 @@ zapisDoPliku(Plik, Tekst) :-
 	
 %plik(P) --> tekst(P).
 %plik(P) --> namespace(M,-1), nl_z, plik(P2), {info('namespace\n'), concat_atom([M,P2],P)}.
-plik(P) --> namespace(M,-1), nl_z,!, {info('namespace\n'), concat_atom([M],P)}.
+plik(P) --> namespace(M,-1), nl_z,!, {info('namespace'), concat_atom([M],P)}.
 
 naglowki(N) :- concat_atom(['\ntest \n'],N).
 %naglowki(N) :- concat_atom(['#include <stdio.h>\n#include <iostream>\n#include <math.h>\nusing namespace std;\n\n'],N).
 
-%namespace(M) --> "namespacee", tekst(Cialo), , {concat_atom([Cialo],M)}.
-%namespace(M) --> "namespacee", odstep, wyraz(Nazwa), nowa_linia, tekst(MC), "End namespacee", !, {concat_atom([W,'namespace:',Nazwa,'\n',MC],M)}.
-namespace(M,Wci) --> "namespace", odstep_k, nazwa(_),odstep, "{", !, {Wci1 is Wci+1}, namespace_cialo(MC,Dekl,Wci1), "}", {concat_atom([Dekl,'\n',MC],M)}.
-namespace_cialo(M,Dekl,Wci) --> funkcja(F,N,Wci), ws,  namespace_cialo(M2,Dekl2,Wci), {concat_atom([F,M2],M), concat_atom([N,Dekl2],Dekl), info(' funkcja ')}.
-namespace_cialo(M,Dekl,Wci) --> class(P,N,Wci),ws,  namespace_cialo(M2,Dekl2,Wci), {concat_atom([P,M2],M), concat_atom([N,Dekl2],Dekl), info(' Klasa ')}.
+namespace(M,Wci) --> "namespace", odstep_k, nazwa(_), odstep, "{", !, {Wci1 is Wci+1}, namespace_cialo(MC,Dekl,Wci1),ws, "}", {concat_atom([Dekl,'\n',MC],M)}.
+namespace_cialo(M,Dekl,Wci) --> funkcja(F,N,Wci),  namespace_cialo(M2,Dekl2,Wci), {concat_atom([F,M2],M), concat_atom([N,Dekl2],Dekl), info(' FUNKCJA ')}.
+namespace_cialo(M,Dekl,Wci) --> class(P,N,Wci),  namespace_cialo(M2,Dekl2,Wci), {concat_atom([P,M2],M), concat_atom([N,Dekl2],Dekl), info(' Klasa ')}.
 namespace_cialo('','',_) --> "".
 
 funkcja(F,Dekl,Wci) --> funkcja_nagl(FN), {Wci1 is Wci+1}, funkcja_cialo(FC,Wci1),  {info('funkcja\n'), wciecie(W,Wci), concat_atom(['\n',W,FN,'\n',W,'{\n',FC,W,'}\n'],F)}.
-funkcja_nagl(FN) --> ws, modyfikator(MX),odstep, typ(T), odstep_k, nazwa(Nazwa), odstep, !, "(", parametry(Parametry),odstep, ")", odstep, '{', !, nl_k, !, {concat_atom([MX ,' ',T,' ',Nazwa, '(', Parametry, ')'],FN), info(FN)}.
+funkcja_nagl(FN) --> ws, modyfikator(MX), odstep, typ(T), odstep_k, nazwa(Nazwa), odstep, !, "(", parametry(Parametry),odstep, ")", odstep, "{", !, nl_k, {concat_atom([MX ,' ',T,' ',Nazwa, '(', Parametry, ')'],FN), info(FN)}.
 funkcja_cialo('',_) --> funkcja_stopka.
 funkcja_cialo(FC,Wci) --> funkcja_return(R,Wci), funkcja_cialo(FC1,Wci), {concat_atom([R,FC1],FC)}.
 funkcja_cialo(FC,Wci) --> instrukcja(Cialo,Wci), funkcja_cialo(FC1,Wci), {concat_atom([Cialo,FC1],FC)}.
-funkcja_stopka --> "}", nl_k.
-funkcja_return(R,Wci) --> ws, "return", odstep_k, wyrazenie(Wyr), {wciecie(W,Wci), concat_atom([W, 'return ',Wyr,';'],R)}.
+funkcja_stopka --> ws, "}", nl_k.
+funkcja_return(R,Wci) --> ws, "return", odstep_k, wyrazenie(Wyr),odstep, ";", {wciecie(W,Wci), concat_atom([W, 'return ' ,Wyr, ';'],R)}.
 
-class(F,Dekl,Wci) --> class_nagl(PN), {Wci1 is Wci+1}, class_cialo(PC,Wci1), {info('class\n'), wciecie(W,Wci), concat_atom(['\n',W,PN,'\n',W,'{\n',PC,W,'}\n'],F), concat_atom([''],Dekl)}.
+class(F,Dekl,Wci) --> class_nagl(PN), {Wci1 is Wci+1}, class_cialo(PC,Wci1), {info('class\n'), wciecie(W,Wci), concat_atom(['\n',W,PN,'\n',W,'{\n',PC,W,'}\n'],F)}.
 class_nagl(PN) --> ws, "class", odstep_k, wyraz(Nazwa) , odstep, "{", !, nl_k, {concat_atom(['class ',Nazwa],PN), info(PN)}.
 class_cialo('',_) --> class_stopka.
 class_cialo(PC,Wci) --> funkcja(Cialo,_,Wci), class_cialo(PC1,Wci), {concat_atom(['\n',Cialo,PC1],PC)}.
@@ -53,7 +51,7 @@ class_stopka --> ws,"}", nl_k.
 parametry(P) --> ws, parametr(P1), odstep, ",", odstep, parametry(P2), {concat_atom([P1,', ',P2],P)}.
 parametry(P) --> parametr(P), {info('Szukam parametru')}.
 parametry('') --> "".
-parametr(P) --> typ(T), odstep_k, nazwa(N), odstep, {concat_atom([T,' ',N],P)}.
+parametr(P) --> ws, typ(T), odstep_k, nazwa(N), odstep, {concat_atom([T,' ',N],P)}.
 
 instrukcje(I,Wci) --> instrukcja(I1,Wci), instrukcje(I2,Wci), {concat_atom([I1,I2],I)}.
 instrukcje('',_) --> "".
@@ -148,12 +146,12 @@ instrukcja(I,Wci) --> petla_for(I,Wci), {info(' FOR ')}.
 instrukcja(I,Wci) --> list_def(I,Wci), {info(' DEF ')}.
 instrukcja(I,Wci) --> komentarz(I,Wci).
 instrukcja(I,Wci) --> warunek_if(I,Wci).
-instrukcja(I,_,Wci) --> funkcja(I,Wci).
+instrukcja(I,_,Wci) --> funkcja(I,_,Wci).
 %instrukcja(I,Wci) --> petla_for_exit(I,Wci).
 instrukcja(I,Wci) --> wywolanie_funkcji(WF), nl_k, {wciecie(W,Wci), concat_atom([W,WF,';\n'],I)}.
 instrukcja(I,Wci) --> "Console.ReadKey();", nl_k, {wciecie(W,Wci), concat_atom([W,'system("pause");\n'],I)}.
 instrukcja(I,Wci) --> linia(I,Wci).%, {info(' LINIA ')}.
-instrukcja(I,Wci) --> "}", {wciecie(W,Wci), concat_atom([W,'}'],I)}.
+%instrukcja(I,Wci) --> "}", {wciecie(W,Wci), concat_atom([W,'}'],I)}.
 
 komentarz(I,Wci) --> "//", linia(L,0), {wciecie(W,Wci), concat_atom([W,'//',L],I)}.
 

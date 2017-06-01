@@ -51,7 +51,7 @@ class(F,Dekl,Wci) --> class_nagl(PN), {Wci1 is Wci+1}, class_cialo(PC,Wci1), {in
 class_nagl(PN) --> "class", odstep_k, wyraz(Nazwa), odstep, !, nl_k, {concat_atom(['class ',Nazwa, '{', class_cialo, '}'],PN), info(PN)}.
 class_cialo('',_) --> class_stopka.
 class_cialo(PC,Wci) --> instrukcja(Cialo, Wci), class_cialo(PC1,Wci), {concat_atom([Cialo,PC1],PC)}.
-class_stopka --> "}", nl_k.
+class_stopka --> ws,"}", nl_k.
 
 parametry(P) --> parametr(P1), odstep, ",", odstep, parametry(P2), {concat_atom([P1,', ',P2],P)}.
 parametry(P) --> parametr(P).

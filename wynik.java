@@ -5,14 +5,10 @@ test
 class cos
 {
 
-	public int zmiana;
+	private int funkcja ( int zmienna ) {
 
-	System.out.print("dziala");
+	System.out.print("dzia³am");
 
-
-	}
-
-	public int funkcja( int zmienna ) {
 
 	return zmienna;
 }
